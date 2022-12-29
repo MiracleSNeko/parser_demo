@@ -30,3 +30,9 @@
 *.exe
 *.out
 *.app
+
+# Cmake build directory
+build/
+
+# Clangd auto-tidy directory
+.cache/
