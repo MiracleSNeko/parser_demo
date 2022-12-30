@@ -135,7 +135,7 @@ constexpr __impl::None NONE{};
 
 // bind:: Option<T> -> (T -> Option<U>) -> Option<U>
 template <typename T, typename Fn>
-constexpr auto operator|(const Option<T>& opt, Fn&& fn)
+constexpr auto operator>>=(const Option<T>& opt, Fn&& fn)
 {
     using U = std::invoke_result_t<Fn, T>;
     return std::visit(__impl::Overload{[&](const __impl::Some<T>& t) -> U { return fn(static_cast<T>(t)); },

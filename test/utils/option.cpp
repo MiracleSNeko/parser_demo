@@ -86,7 +86,7 @@ TEST(OptionConstruct, CompileTimeUserDefinedStruct)
 
 TEST(OptionContinuation, SomeTContinueationToSomeU)
 {
-    Option int_2 = SOME(1) | [](int i) { return SOME(i + 1); };
+    Option int_2 = SOME(1) >>= [](int i) { return SOME(i + 1); };
 
     EXPECT_TRUE(int_2.is_some());
     EXPECT_EQ(int_2.unwrap(), 2);
@@ -94,7 +94,7 @@ TEST(OptionContinuation, SomeTContinueationToSomeU)
 
 TEST(OptionContinuation, SomeTContinueationToNone)
 {
-    Option<int> none = SOME(1) | [](int _) { return NONE; };
+    Option<int> none = SOME(1) >>= [](int _) { return NONE; };
 
     EXPECT_TRUE(none.is_none());
     EXPECT_THROW(none.unwrap(), std::runtime_error);
@@ -102,7 +102,7 @@ TEST(OptionContinuation, SomeTContinueationToNone)
 
 TEST(OptionContinuation, NoneContinueationToSomeU)
 {
-    Option none = Option<int>(NONE) | [](int i) { return SOME(i + 1); };
+    Option none = Option<int>(NONE) >>= [](int i) { return SOME(i + 1); };
 
     EXPECT_TRUE(none.is_none());
     EXPECT_THROW(none.unwrap(), std::runtime_error);
@@ -110,7 +110,7 @@ TEST(OptionContinuation, NoneContinueationToSomeU)
 
 TEST(OptionContinuation, CompileTimeContinuation)
 {
-    constexpr Option cint_2 = SOME(1) | [](int i) { return SOME(i + 1); };
+    constexpr Option cint_2 = SOME(1) >>= [](int i) { return SOME(i + 1); };
 
     static_assert(cint_2.is_some());
     static_assert(cint_2 == SOME(2));

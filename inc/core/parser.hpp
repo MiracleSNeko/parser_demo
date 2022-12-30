@@ -44,7 +44,7 @@ constexpr auto Map(Fn&& fn, Parser&& parser)
     using R   = ParserOutput<std::invoke_result_t<Fn, T>>;
 
     return [fn = std::forward(fn), parser = std::forward(parser)](ParserInput code) -> R {
-        return parser(code) | [](const Mir& mir) -> R { return SOME(std::make_pair(fn(mir.first), mir.second)); };
+        return parser(code) >>= [](const Mir& mir) -> R { return SOME(std::make_pair(fn(mir.first), mir.second)); };
     };
 }
 
@@ -59,7 +59,7 @@ constexpr auto Bind(Fn&& fn, Parser&& parser)
     using R   = ParserOutput<std::invoke_result_t<Fn, T, ParserInput>>;
 
     return [fn = std::forward(fn), parser = std::forward(parser)](ParserInput code) -> R {
-        return parser(code) | [](const Mir& mir) -> R { return fn(mir.first, mir.second); };
+        return parser(code) >>= [](const Mir& mir) -> R { return fn(mir.first, mir.second); };
     };
 }
 

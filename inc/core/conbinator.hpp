@@ -43,10 +43,10 @@ constexpr auto Combine(Parser1&& parser1, Parser2&& parser2, Fn&& fn)
 
     return [parser1 = std::forward(parser1), parser2 = std::forward(parser2),
             fn = std::forward(fn)](ParserInput code) -> ParserOutput<R> {
-        return parser1(code) | [&](const Mir1& mir1) {
-            parser2(mir1.second) |
+        return parser1(code) >>= [&](const Mir1& mir1) {
+            parser2(mir1.second) >>=
                 [r1 = mir1.first](const Mir2& mir2) { return SOME(std::make_tuple(r1, mir2.first, mir2.second)); };
-        } | [fn = std::forward(fn)](const auto& tuple1_2) -> ParserOutput<R> {
+        } >>= [fn = std::forward(fn)](const auto& tuple1_2) -> ParserOutput<R> {
             const auto [r1, r2, code] = tuple1_2;
             return SOME(std::make_pair(fn(r1, r2), code));
         };
@@ -179,7 +179,8 @@ constexpr auto Many(Parser&& parser, Acc&& acc, Fn&& fn)
 
     return [parser = std::forward(parser), acc = std::forward(acc),
             fn = std::forward(fn)](ParserInput code) -> ParserOutput<Acc> {
-        return parser(code) | [&](const Mir& mir) { return __impl::Fold(parser, mir.second, fn(acc, mir.firsrt), fn); };
+        return parser(code) >>=
+               [&](const Mir& mir) { return __impl::Fold(parser, mir.second, fn(acc, mir.firsrt), fn); };
     };
 }
 
