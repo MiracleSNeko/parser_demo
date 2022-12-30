@@ -14,8 +14,8 @@ set(CMAKE_CXX_FLAGS_RELEASE "-W -Wall -std=c++20 -o2")
 # SOURCE FILE
 file(
     GLOB_RECURSE SRC_DIR_LIST
-    "src/*.cpp"
-    "src/*.c"
+    "test/*.cpp"
+    "test/*.c"
 )
 
 message(STATUS "source files as follows...")

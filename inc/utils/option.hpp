@@ -12,10 +12,20 @@ namespace d1::utils::option
 
 constexpr std::string_view MODULE_NAME{"utils/option.hpp"};
 
+template <typename T>
+class Option;
+
 namespace __impl
 {
     struct None
     {
+        /* static cast */
+        template <typename T>
+        constexpr operator Option<T>()
+        {
+            return None{};
+        }
+
         /* for gtest */
         constexpr __always_inline bool operator==(const None& _) const noexcept
         {
@@ -58,8 +68,6 @@ namespace __impl
     };
 }  // namespace __impl
 
-constexpr __impl::None NONE{};
-
 // `Option` is a Monad
 template <typename T>
 class Option
@@ -69,7 +77,7 @@ public:
     using value_type = T;
 
     constexpr Option(const T& t) : _option(__impl::Some(t)) {}
-    constexpr Option(__impl::None) : _option(NONE) {}
+    constexpr Option(__impl::None) : _option(__impl::None{}) {}
 
     constexpr auto to_variant() const noexcept
     {
@@ -114,16 +122,16 @@ private:
 
 // unit:: t -> Option<T>
 template <typename T>
-constexpr auto Some(T t) -> Option<T>
+using Some = __impl::Some<T>;
+
+template <typename T>
+constexpr auto SOME(T t) -> Option<T>
 {
     return t;
 };
 
-template <typename T>
-constexpr auto None() -> Option<T>
-{
-    return NONE;
-};
+using None = __impl::None;
+constexpr __impl::None NONE{};
 
 // bind:: Option<T> -> (T -> Option<U>) -> Option<U>
 template <typename T, typename Fn>
