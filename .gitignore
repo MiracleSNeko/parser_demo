@@ -36,7 +36,3 @@ build/
 
 # Clangd auto-tidy directory
 .cache/
-
-
-inc/utils/algorithms.hpp
-test/utils/algorithms.cpp
