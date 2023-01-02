@@ -1,6 +1,5 @@
 #pragma once
 
-#include <gtest/internal/gtest-type-util.h>
 #include <string_view>
 #include <tuple>
 #include <type_traits>
@@ -9,6 +8,8 @@
 
 #include "../utils/option.hpp"
 #include "./parser.hpp"
+
+using namespace std::literals;
 
 using d1::core::parser::ParserInput;
 using d1::core::parser::ParserOutput;
@@ -19,6 +20,8 @@ using d1::utils::option::SOME;
 
 namespace d1::core::combinator
 {
+
+constexpr auto MODULE_NAME{"core/combinator.hpp"sv};
 
 namespace __impl
 {

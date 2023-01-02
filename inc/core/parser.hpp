@@ -1,5 +1,6 @@
 #pragma once
 
+#include <functional>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -31,7 +32,8 @@ namespace __impl
 
 // `Parser a :: String -> [(a, String )]` is a Monad.
 template <typename T>
-using Parser = auto(*)(ParserInput) -> ParserOutput<T>;
+// using Parser = auto(*)(ParserInput) -> ParserOutput<T>;
+using Parser = std::function<ParserOutput<T>(ParserInput)>;
 
 // map a function into a `Parser a`
 // Fn b :: a -> b
