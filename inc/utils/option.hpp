@@ -97,11 +97,8 @@ public:
     constexpr T unwrap() const
     {
         return std::visit(__impl::Overload{[](const __impl::Some<T>& t) -> T { return static_cast<T>(t); },
-                                           [this](const __impl::None& _) -> T {
-                                               char errmsg[128];
-                                               sprintf(errmsg, "Unwrapping a `None` at address %p, panic!", this);
-                                               throw std::runtime_error(errmsg);
-                                               // unreachable
+                                           [](const __impl::None& _) -> T {
+                                               throw std::runtime_error("unwrapping a `None` value, panic!");
                                            }},
                           _option);
     }

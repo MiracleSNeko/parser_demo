@@ -56,7 +56,7 @@ constexpr auto ParseString(std::string_view str)
         if (pos.first == str.cend())
         {
             // match success
-            const auto len = calgo::distance(code.cend(), pos.second);
+            const auto len = calgo::distance(pos.second, code.cend());
             return SOME(std::make_pair(str, ParserInput(pos.second, len)));
         }
         else
