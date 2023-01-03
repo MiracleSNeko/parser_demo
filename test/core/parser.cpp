@@ -12,6 +12,7 @@ using d1::core::combinator::Combine;
 using d1::core::combinator::Exactly;
 using d1::core::combinator::Many;
 
+using namespace d1::core::basic_parser_combinator::literals;
 using namespace std::literals;
 
 TEST(BasicParserCombinators, StringParser)
@@ -24,7 +25,7 @@ TEST(BasicParserCombinators, StringParser)
     static_assert(result.unwrap().second == " @loki this is a message."sv);
 }
 
-TEST(BasicParserCombinators, IntWithoutRangeExceeded)
+TEST(BasicParserCombinators, CreateIntParserWithoutRangeExceeded)
 {
     constexpr auto digit_parser = ParseOneOfChars("0123456789"sv);
     constexpr auto int_parser   = Many(digit_parser, 0, [](int acc, char ch) { return acc * 10 + (ch - '0'); });
@@ -33,4 +34,49 @@ TEST(BasicParserCombinators, IntWithoutRangeExceeded)
 
     static_assert(result.unwrap().first == 12345);
     static_assert(result.unwrap().second == "def"sv);
+}
+
+TEST(BasicParserCombinators, Alphabet)
+{
+    constexpr auto result = alphabet_parser("a");
+
+    static_assert(result.unwrap().first == 'a');
+    static_assert(result.unwrap().second == ""sv);
+}
+
+TEST(BasicParserCombinators, Int32WithRangeExceeded)
+{
+    constexpr auto result_pos1 = int32_parser("2147483647"sv);
+    constexpr auto result_pos2 = int32_parser("+2147483648"sv);
+
+    static_assert(result_pos1.unwrap().first == 2147483647);
+    static_assert(result_pos1.unwrap().second == ""sv);
+    static_assert(result_pos2.unwrap().first == 214748364);
+    static_assert(result_pos2.unwrap().second == "8"sv);
+
+    constexpr auto result_neg1 = int32_parser("-2147483648"sv);
+    constexpr auto result_neg2 = int32_parser("-2147483649"sv);
+
+    static_assert(result_neg1.unwrap().first == -2147483648);
+    static_assert(result_neg1.unwrap().second == ""sv);
+    static_assert(result_neg2.unwrap().first == -214748364);
+    static_assert(result_neg2.unwrap().second == "9"sv);
+
+    constexpr auto result_none  = int32_parser("+"sv);
+    constexpr auto result_none2 = int32_parser("-"sv);
+
+    static_assert(result_none.is_none());
+    static_assert(result_none2.is_none());
+}
+
+TEST(BasicParserCombinators, Uint32WithRangeExceeded)
+{
+    constexpr auto result  = uint32_parser("4294967295"sv);
+    constexpr auto result2 = uint32_parser("4294967296"sv);
+
+    static_assert(result.unwrap().first == 4294967295);
+    static_assert(result.unwrap().second == ""sv);
+
+    static_assert(result2.unwrap().first == 429496729);
+    static_assert(result2.unwrap().second == "6"sv);
 }

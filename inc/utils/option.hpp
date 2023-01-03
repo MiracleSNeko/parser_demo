@@ -77,6 +77,7 @@ public:
     using value_type = T;
 
     constexpr Option(const T& t) : _option(__impl::Some(t)) {}
+    constexpr Option(const __impl::Some<T>& t) : _option(t) {}
     constexpr Option(__impl::None) : _option(__impl::None{}) {}
 
     constexpr auto to_variant() const noexcept

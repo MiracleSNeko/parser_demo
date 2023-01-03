@@ -38,30 +38,30 @@ using Parser = std::function<ParserOutput<T>(ParserInput)>;
 // map a function into a `Parser a`
 // Fn b :: a -> b
 // Map :: Fn b -> Parser a -> (ParserInput -> ParserOutput b)
-template <typename Fn, typename Parser>
-constexpr auto Map(Fn&& fn, Parser&& parser)
+template <typename Parser, typename Fn>
+constexpr auto Map(Parser&& parser, Fn&& fn)
 {
     using Mir = __impl::ParsedMirType<Parser>;
     using T   = __impl::ParsedResultType<Parser>;
     using R   = ParserOutput<std::invoke_result_t<Fn, T>>;
 
-    return [fn = std::forward(fn), parser = std::forward(parser)](ParserInput code) -> R {
-        return parser(code) >>= [](const Mir& mir) -> R { return SOME(std::make_pair(fn(mir.first), mir.second)); };
+    return [=](ParserInput code) -> R {
+        return parser(code) >>= [=](const Mir& mir) -> R { return SOME(std::make_pair(fn(mir.first), mir.second)); };
     };
 }
 
 // bind a function into a `Parser a`
 // Fn b :: a -> ParserInput -> ParserOutput b
 // Bind :: Fn b -> Parser a -> (a -> ParserInput -> ParserOutput b)
-template <typename Fn, typename Parser>
-constexpr auto Bind(Fn&& fn, Parser&& parser)
+template <typename Parser, typename Fn>
+constexpr auto Bind(Parser&& parser, Fn&& fn)
 {
     using Mir = __impl::ParsedMirType<Parser>;
     using T   = __impl::ParsedResultType<Parser>;
     using R   = ParserOutput<std::invoke_result_t<Fn, T, ParserInput>>;
 
-    return [fn = std::forward(fn), parser = std::forward(parser)](ParserInput code) -> R {
-        return parser(code) >>= [](const Mir& mir) -> R { return fn(mir.first, mir.second); };
+    return [=](ParserInput code) -> R {
+        return parser(code) >>= [=](const Mir& mir) -> R { return fn(mir.first, mir.second); };
     };
 }
 
