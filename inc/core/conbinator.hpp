@@ -44,12 +44,11 @@ constexpr auto Combine(Parser1&& parser1, Parser2&& parser2, Fn&& fn)
     using T2   = __impl::ParsedResultType<Parser2>;
     using R    = std::invoke_result_t<Fn, T1, T2>;
 
-    return [parser1 = std::forward(parser1), parser2 = std::forward(parser2),
-            fn = std::forward(fn)](ParserInput code) -> ParserOutput<R> {
+    return [=](ParserInput code) -> ParserOutput<R> {
         return parser1(code) >>= [&](const Mir1& mir1) {
             parser2(mir1.second) >>=
                 [r1 = mir1.first](const Mir2& mir2) { return SOME(std::make_tuple(r1, mir2.first, mir2.second)); };
-        } >>= [fn = std::forward(fn)](const auto& tuple1_2) -> ParserOutput<R> {
+        } >>= [=](const auto& tuple1_2) -> ParserOutput<R> {
             const auto [r1, r2, code] = tuple1_2;
             return SOME(std::make_pair(fn(r1, r2), code));
         };
@@ -67,7 +66,7 @@ constexpr auto operator||(Parser1&& parser1, Parser2&& parser2)
     using Mir = __impl::ParsedMirType<Parser1>;
     using T   = __impl::ParsedResultType<Parser1>;
 
-    return [parser1 = std::forward(parser1), parser2 = std::forward(parser2)](ParserInput code) -> Mir {
+    return [=](ParserInput code) -> Mir {
         return std::visit(__impl::Overload{
                               [](const Some<Mir>& mir) -> ParserOutput<T> { return mir; },
                               [&](const None& _) -> ParserOutput<T> { return parser2(code); },
@@ -102,7 +101,7 @@ namespace __impl
     {
         while (true)
         {
-            constexpr auto mir = parser(code);
+            const auto mir = parser(code);
 
             if (mir.is_none())
             {
@@ -111,7 +110,7 @@ namespace __impl
             else
             {
                 acc  = fn(acc, mir.unwrap().first);
-                code = mir.unwrap().second();
+                code = mir.unwrap().second;
             }
         }
     }
@@ -122,7 +121,7 @@ namespace __impl
     {
         while (times != 0)
         {
-            constexpr auto mir = parser(code);
+            const auto mir = parser(code);
 
             if (mir.is_none())
             {
@@ -131,7 +130,7 @@ namespace __impl
             else
             {
                 acc  = fn(acc, mir.unwrap().firsr);
-                code = mir.unwrap().second();
+                code = mir.unwrap().second;
                 times -= 1;
             }
         }
@@ -149,8 +148,7 @@ constexpr auto Try(Parser&& parser, T&& default_value)
 {
     using Mir = __impl::ParsedMirType<Parser>;
 
-    return [parser        = std::forward(parser),
-            default_value = std::forward(default_value)](ParserInput code) -> ParserOutput<T> {
+    return [=](ParserInput code) -> ParserOutput<T> {
         return std::visit(
             __impl::Overload{
                 [](const Some<Mir>& mir) -> ParserOutput<T> { return Option(mir); },
@@ -167,8 +165,7 @@ constexpr auto Try(Parser&& parser, T&& default_value)
 template <typename Parser, typename Acc = __impl::ParsedResultType<Parser>, typename Fn>
 constexpr auto Any(Parser&& parser, Acc&& acc, Fn&& fn)
 {
-    return [parser = std::forward(parser), acc = std::forward(acc), fn = std::forward(fn)](
-               ParserInput code) -> ParserOutput<Acc> { return __impl::Fold(parser, code, acc, fn); };
+    return [=](ParserInput code) -> ParserOutput<Acc> { return __impl::Fold(parser, code, acc, fn); };
 };
 
 // Apply + of a parser, then accumulate the results.
@@ -180,10 +177,9 @@ constexpr auto Many(Parser&& parser, Acc&& acc, Fn&& fn)
 {
     using Mir = __impl::ParsedMirType<Parser>;
 
-    return [parser = std::forward(parser), acc = std::forward(acc),
-            fn = std::forward(fn)](ParserInput code) -> ParserOutput<Acc> {
+    return [=](ParserInput code) -> ParserOutput<Acc> {
         return parser(code) >>=
-               [&](const Mir& mir) { return __impl::Fold(parser, mir.second, fn(acc, mir.firsrt), fn); };
+               [=](const Mir& mir) { return __impl::Fold(parser, mir.second, fn(acc, mir.first), fn); };
     };
 }
 
@@ -194,8 +190,7 @@ constexpr auto Many(Parser&& parser, Acc&& acc, Fn&& fn)
 template <typename Parser, typename Acc = __impl::ParsedResultType<Parser>, typename Fn>
 constexpr auto Exactly(Parser&& parser, Acc&& acc, std::size_t times, Fn&& fn)
 {
-    return [parser = std::forward(parser), acc = std::forward(acc), fn = std::forward(fn),
-            times](ParserInput code) -> ParserOutput<Acc> { return __impl::FoldExactly(parser, code, acc, times, fn); };
+    return [=](ParserInput code) -> ParserOutput<Acc> { return __impl::FoldExactly(parser, code, acc, times, fn); };
 }
 
 }  // namespace d1::core::combinator
