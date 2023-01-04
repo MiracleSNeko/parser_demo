@@ -49,38 +49,14 @@ constexpr auto Combine(Parser1&& parser1, Parser2&& parser2, Fn&& fn)
     using R    = std::invoke_result_t<Fn, T1, T2>;
 
     return [=](ParserInput code) -> ParserOutput<R> {
-        // return parser1(code) >>= [=](const Mir1& mir1) {
-        //     parser2(mir1.second) >>=
-        //         [r1 = mir1.first](const Mir2& mir2) { return SOME(std::make_tuple(r1, mir2.first, mir2.second)); };
-        // } >>= [=](const auto& tuple1_2) -> ParserOutput<R> {
-        //     const auto [r1, r2, code] = tuple1_2;
-        //     return SOME(std::make_pair(fn(r1, r2), code));
-        // };
-        const auto mir1 = parser1(code);
-
-        if (mir1.is_none())
-        {
-            return NONE;
-        }
-        else
-        {
-            const auto result1 = mir1.unwrap().first;
-            const auto code    = mir1.unwrap().second;
-
-            const auto mir2 = parser2(code);
-
-            if (mir2.is_none())
-            {
-                return NONE;
-            }
-            else
-            {
-                const auto result2 = mir2.unwrap().first;
-                const auto code    = mir2.unwrap().second;
-
-                return SOME(std::make_pair(fn(result1, result2), code));
-            }
-        }
+        return (parser1(code) >>= [=](const Mir1& mir1) {
+                   return parser2(mir1.second) >>= [r1 = mir1.first](const Mir2& mir2) {
+                       return SOME(std::make_tuple(r1, mir2.first, mir2.second));
+                   };
+               }) >>= [=](const auto& tuple1_2) -> ParserOutput<R> {
+            const auto [r1, r2, code] = tuple1_2;
+            return SOME(std::make_pair(fn(r1, r2), code));
+        };
     };
 }
 

@@ -111,15 +111,53 @@ constexpr auto ParseInt32()
     return neg_parser || pos_parser;
 }
 
+// parse a int64_value
+constexpr auto ParseInt64()
+{
+    constexpr std::int64_t INT64_MAX_DIV_10 = std::numeric_limits<std::int64_t>::max() / 10;
+    constexpr std::int64_t INT64_MAX_MOD_10 = std::numeric_limits<std::int64_t>::max() % 10;
+
+    constexpr auto abs_parser = [](std::int64_t limit_dig) {
+        return DoWhile(
+            digit_parser, static_cast<std::uint64_t>(0), [](std::uint64_t acc, int dig) { return acc * 10 + dig; },
+            [limit_dig](std::uint64_t acc, int dig) { return acc < INT64_MAX_DIV_10 || dig <= limit_dig; });
+    };
+
+    constexpr auto neg_parser = Combine(
+        Map(ParseChar('-'), [](char _) { return -1; }), abs_parser(INT64_MAX_MOD_10 + 1), [](int _, std::uint64_t val) {
+            return val == static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()) + 1 ?
+                       std::numeric_limits<std::int64_t>::min() :
+                       -1 * static_cast<std::int64_t>(val)；
+        });
+
+    constexpr auto pos_parser =
+        Combine(Try(Map(ParseChar('+'), [](char _) { return 1; }), 1), abs_parser(INT64_MAX_MOD_10),
+                [](int _, std::uint64_t val) { return static_cast<std::int64_t>(val); });
+
+    // Only one of them will be satisfied, so choose any one of them is ok.
+    return neg_parser || pos_parser;
+}
+
 // parse a uint32_t value
 constexpr auto ParseUint32()
 {
     constexpr std::uint32_t UINT32_MAX_DIV_10 = std::numeric_limits<std::uint32_t>::max() / 10;
     constexpr std::uint32_t UINT32_MAX_MOD_10 = std::numeric_limits<std::uint32_t>::max() % 10;
 
-    return While(
+    return DoWhile(
         digit_parser, static_cast<std::uint32_t>(0), [](std::uint32_t acc, int dig) { return acc * 10 + dig; },
         [](std::uint32_t acc, int dig) { return acc < UINT32_MAX_DIV_10 || dig <= UINT32_MAX_MOD_10; });
+}
+
+// parse a uint64_t value
+constexpr auto ParseUint64()
+{
+    constexpr std::uint64_t UINT64_MAX_DEV_10 = std::numeric_limits<std::uint64_t>::max() / 10;
+    constexpr std::uint64_t UINT64_MAX_MOD_10 = std::numeric_limits<std::uint64_t>::max() % 10;
+
+    return DoWhile(
+        digit_parser, static_cast<std::uint64_t>(0), [](std::uint64_t acc, int dig) { return acc * 10 + dig; },
+        [](std::uint64_t acc, int dig) { return acc < UINT64_MAX_DEV_10 || dig <= UINT64_MAX_MOD_10; });
 }
 
 inline namespace literals
@@ -127,8 +165,14 @@ inline namespace literals
     // int32_t
     constexpr auto int32_parser = ParseInt32();
 
+    // int64_t
+    constexpr auto int64_parser = ParseInt64();
+
     // uint32_t
     constexpr auto uint32_parser = ParseUint32();
+
+    // uint64_t
+    constexpr auto uint64_parser = ParseUint64();
 }  // namespace literals
 
 }  // namespace d1::core::basic_parser_combinator

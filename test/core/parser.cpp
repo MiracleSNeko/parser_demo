@@ -79,4 +79,49 @@ TEST(BasicParserCombinators, Uint32WithRangeExceeded)
 
     static_assert(result2.unwrap().first == 429496729);
     static_assert(result2.unwrap().second == "6"sv);
+
+    constexpr auto none = uint32_parser(""sv);
+
+    static_assert(none.is_none());
+}
+
+TEST(BasicParserCombinators, Int64WithRangeExceeded)
+{
+    constexpr auto result_pos1 = int64_parser("9223372036854775807"sv);
+    constexpr auto result_pos2 = int64_parser("+9223372036854775808"sv);
+
+    static_assert(result_pos1.unwrap().first == 9223372036854775807);
+    static_assert(result_pos1.unwrap().second == ""sv);
+    static_assert(result_pos2.unwrap().first == 922337203685477580);
+    static_assert(result_pos2.unwrap().second == "8"sv);
+
+    constexpr auto result_neg1 = int64_parser("-9223372036854775808"sv);
+    constexpr auto result_neg2 = int64_parser("-9223372036854775809"sv);
+
+    static_assert(result_neg1.unwrap().first == -9223372036854775808);
+    static_assert(result_neg1.unwrap().second == ""sv);
+    static_assert(result_neg2.unwrap().first == -922337203685477580);
+    static_assert(result_neg2.unwrap().second == "9"sv);
+
+    constexpr auto result_none  = int64_parser("+"sv);
+    constexpr auto result_none2 = int64_parser("-"sv);
+
+    static_assert(result_none.is_none());
+    static_assert(result_none2.is_none());
+}
+
+TEST(BasicParserCombinators, Uint64WithRangeExceeded)
+{
+    constexpr auto result  = uint64_parser("18446744073709551615"sv);
+    constexpr auto result2 = uint64_parser("18446744073709551616"sv);
+
+    static_assert(result.unwrap().first == 18446744073709551615);
+    static_assert(result.unwrap().second == ""sv);
+
+    static_assert(result2.unwrap().first == 1844674407370955161);
+    static_assert(result2.unwrap().second == "6"sv);
+
+    constexpr auto none = uint64_parser(""sv);
+
+    static_assert(none.is_none());
 }

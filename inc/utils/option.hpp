@@ -1,5 +1,8 @@
 #pragma once
 
+#include "./type_traits.hpp"
+
+#include <concepts>
 #include <optional>
 #include <stdexcept>
 #include <string_view>
@@ -131,12 +134,33 @@ constexpr auto SOME(T t) -> Option<T>
 using None = __impl::None;
 constexpr __impl::None NONE{};
 
+namespace __impl
+{
+    using namespace d1::utils::function_traits;
+    using namespace d1::utils::template_traits;
+
+    template <typename T, typename Fn>
+    concept bindable_to =
+        requires {
+            {
+                std::same_as<T, std::remove_cvref_t<typename __impl::function_traits<Fn>::template args<0>::type>>
+            };
+            {
+                __impl::is_template_of_v<Option, typename __impl::function_traits<Fn>::return_type>
+            };
+        };
+
+}  // namespace __impl
+
 // bind:: Option<T> -> (T -> Option<U>) -> Option<U>
 template <typename T, typename Fn>
+// TODO: bugs here.
+//       need proxy class instead of specialization explicitly.
+//    requires __impl::bindable_to<T, Fn>
 constexpr auto operator>>=(const Option<T>& opt, Fn&& fn)
 {
     using U = std::invoke_result_t<Fn, T>;
-    return std::visit(__impl::Overload{[&](const __impl::Some<T>& t) -> U { return fn(static_cast<T>(t)); },
+    return std::visit(__impl::Overload{[=](const __impl::Some<T>& t) -> U { return fn(static_cast<T>(t)); },
                                        [](const __impl::None& _) -> U { return NONE; }},
                       opt.to_variant());
 }
