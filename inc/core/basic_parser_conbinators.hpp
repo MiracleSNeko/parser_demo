@@ -4,13 +4,14 @@
 #include <string_view>
 
 #include "../utils/algorithms.hpp"
+#include "../utils/containers.hpp"
+#include "../utils/option.hpp"
 #include "./conbinator.hpp"
 #include "./parser.hpp"
 
 using d1::core::combinator::Combine;
 using d1::core::combinator::DoWhile;
 using d1::core::combinator::Try;
-using d1::core::combinator::While;
 using d1::core::parser::Map;
 using d1::core::parser::ParserInput;
 using d1::core::parser::ParserOutput;
@@ -127,7 +128,7 @@ constexpr auto ParseInt64()
         Map(ParseChar('-'), [](char _) { return -1; }), abs_parser(INT64_MAX_MOD_10 + 1), [](int _, std::uint64_t val) {
             return val == static_cast<std::uint64_t>(std::numeric_limits<std::int64_t>::max()) + 1 ?
                        std::numeric_limits<std::int64_t>::min() :
-                       -1 * static_cast<std::int64_t>(val)；
+                       -1 * static_cast<std::int64_t>(val);
         });
 
     constexpr auto pos_parser =

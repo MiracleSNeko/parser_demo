@@ -10,6 +10,8 @@ using d1::utils::option::None;
 using d1::utils::option::Option;
 using d1::utils::option::SOME;
 using d1::utils::option::Some;
+using d1::utils::option::operator>>=;
+using d1::utils::option::operator<<=;
 
 TEST(OptionConstruct, WithValue)
 {
@@ -114,4 +116,12 @@ TEST(OptionContinuation, CompileTimeContinuation)
 
     static_assert(cint_2.is_some());
     static_assert(cint_2 == SOME(2));
+}
+
+TEST(OptionContinuation, MultiContinuation)
+{
+    constexpr Option cint_3 = SOME(1) >>= [](int i) { return SOME(2 * i); } <<= [](int i) { return SOME(i + 1); };
+
+    static_assert(cint_3.is_some());
+    static_assert(cint_3 == SOME(3));
 }

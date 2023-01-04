@@ -17,6 +17,8 @@ using d1::utils::option::None;
 using d1::utils::option::NONE;
 using d1::utils::option::Some;
 using d1::utils::option::SOME;
+using d1::utils::option::operator>>=;
+using d1::utils::option::operator<<=;
 
 namespace d1::core::combinator
 {
@@ -49,14 +51,14 @@ constexpr auto Combine(Parser1&& parser1, Parser2&& parser2, Fn&& fn)
     using R    = std::invoke_result_t<Fn, T1, T2>;
 
     return [=](ParserInput code) -> ParserOutput<R> {
-        return (parser1(code) >>= [=](const Mir1& mir1) {
+        return parser1(code) >>= ([=](const Mir1& mir1) {
                    return parser2(mir1.second) >>= [r1 = mir1.first](const Mir2& mir2) {
                        return SOME(std::make_tuple(r1, mir2.first, mir2.second));
                    };
-               }) >>= [=](const auto& tuple1_2) -> ParserOutput<R> {
-            const auto [r1, r2, code] = tuple1_2;
-            return SOME(std::make_pair(fn(r1, r2), code));
-        };
+               } <<= [=](const auto& tuple1_2) -> ParserOutput<R> {
+                   const auto [r1, r2, code] = tuple1_2;
+                   return SOME(std::make_pair(fn(r1, r2), code));
+               });
     };
 }
 

@@ -178,4 +178,91 @@ constexpr bool operator!=(const StaticVector<T, Cap1>& lhs, const StaticVector<T
     return !(lhs == rhs);
 }
 
+namespace __impl
+{
+    class BasicStringWrapper
+    {
+    public:
+        template <std::size_t N>
+        constexpr BasicStringWrapper(const char (&str)[N]) noexcept : _data(str), _size(N)
+        {
+        }
+
+        constexpr BasicStringWrapper(const char* str, std::size_t size) : _data(str), _size(size) {}
+
+        constexpr BasicStringWrapper() = default;
+
+        constexpr std::size_t size() const noexcept
+        {
+            return _size;
+        }
+
+        constexpr const char* c_str() const noexcept
+        {
+            return _data;
+        }
+
+        constexpr const char* begin() const noexcept
+        {
+            return _data;
+        }
+        constexpr const char* cbegin() const noexcept
+        {
+            return _data;
+        }
+
+        constexpr const char* end() const noexcept
+        {
+            return _data + _size;
+        }
+        constexpr const char* cend() const noexcept
+        {
+            return _data + _size;
+        }
+
+    private:
+        const char* _data{nullptr};
+        std::size_t _size{0};
+    };
+
+    constexpr bool operator==(const BasicStringWrapper& lhs, const BasicStringWrapper& rhs)
+    {
+        return lhs.size() == rhs.size() && calgo::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    }
+}  // namespace __impl
+
+template <typename Char, std::size_t Capacity = 128>
+class StaticString : public StaticVector<Char, Capacity>
+{
+public:
+    constexpr StaticString(const __impl::BasicStringWrapper& str) : StaticVector<Char, Capacity>(str.begin(), str.end())
+    {
+    }
+
+    constexpr StaticString(const std::string_view& str) : StaticVector<Char, Capacity>(str.begin(), str.end()) {}
+
+    constexpr StaticString() = default;
+
+    constexpr StaticString& operator=(const __impl::BasicStringWrapper& str)
+    {
+        return *this = StaticString(str);
+    }
+
+    constexpr StaticString& operator=(const std::string_view& str)
+    {
+        return *this = StaticString(str);
+    }
+
+    constexpr const char* c_str() const noexcept
+    {
+        return this->data();
+    }
+};
+
+template <typename Char, std::size_t Cap1, std::size_t Cap2>
+constexpr bool operator==(const StaticString<Char, Cap1>& lhs, const StaticString<Char, Cap2>& rhs)
+{
+    return Cap1 == Cap2 && calgo::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+}
+
 }  // namespace d1::utils::containers

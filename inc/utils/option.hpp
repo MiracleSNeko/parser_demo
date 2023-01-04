@@ -156,13 +156,20 @@ namespace __impl
 template <typename T, typename Fn>
 // TODO: bugs here.
 //       need proxy class instead of specialization explicitly.
-//    requires __impl::bindable_to<T, Fn>
+//   requires __impl::bindable_to<T, Fn>
 constexpr auto operator>>=(const Option<T>& opt, Fn&& fn)
 {
     using U = std::invoke_result_t<Fn, T>;
     return std::visit(__impl::Overload{[=](const __impl::Some<T>& t) -> U { return fn(static_cast<T>(t)); },
                                        [](const __impl::None& _) -> U { return NONE; }},
                       opt.to_variant());
+}
+
+template <typename Fn1, typename Fn2>
+    requires __impl::callable_object<Fn1> && __impl::callable_object<Fn2>
+constexpr auto operator<<=(Fn1&& fn1, Fn2&& fn2)
+{
+    return [=](const auto& input) { return fn1(input) >>= fn2; };
 }
 
 }  // namespace d1::utils::option
