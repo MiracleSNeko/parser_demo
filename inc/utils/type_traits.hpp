@@ -1,10 +1,14 @@
 #pragma once
 
 #include <functional>
+#include <string_view>
 #include <type_traits>
 
 namespace d1::utils::template_traits
 {
+using namespace std::literals;
+
+constexpr auto MODULE_NAME{"utils/type_traits.hpp"sv};
 
 template <typename T, typename = std::void_t<>>
 struct is_callable_object : std::false_type

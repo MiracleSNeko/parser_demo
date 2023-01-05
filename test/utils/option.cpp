@@ -3,15 +3,9 @@
 #include <sys/cdefs.h>
 #include <variant>
 
-#include "../../inc/utils/option.hpp"
+#include "../../inc/parser_demo"
 
-using d1::utils::option::NONE;
-using d1::utils::option::None;
-using d1::utils::option::Option;
-using d1::utils::option::SOME;
-using d1::utils::option::Some;
-using d1::utils::option::operator>>=;
-using d1::utils::option::operator<<=;
+using namespace d1;
 
 TEST(OptionConstruct, WithValue)
 {

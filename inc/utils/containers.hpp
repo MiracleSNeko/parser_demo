@@ -8,10 +8,14 @@
 #include <initializer_list>
 #include <iterator>
 #include <stdexcept>
+#include <string_view>
 #include <utility>
 
 namespace d1::utils::containers
 {
+using namespace std::literals;
+
+constexpr auto MODULE_NAME{"utils/containers.hpp"sv};
 
 namespace __impl
 {
@@ -178,6 +182,12 @@ constexpr bool operator!=(const StaticVector<T, Cap1>& lhs, const StaticVector<T
     return !(lhs == rhs);
 }
 
+namespace operators
+{
+    using d1::utils::containers::operator==;
+    using d1::utils::containers::operator!=;
+}  // namespace operators
+
 namespace __impl
 {
     class BasicStringWrapper
@@ -189,6 +199,8 @@ namespace __impl
         }
 
         constexpr BasicStringWrapper(const char* str, std::size_t size) : _data(str), _size(size) {}
+
+        constexpr BasicStringWrapper(std::string_view str) : _data(str.data()), _size(str.size()) {}
 
         constexpr BasicStringWrapper() = default;
 
@@ -257,12 +269,22 @@ public:
     {
         return this->data();
     }
+
+    constexpr std::string_view to_string_view() const noexcept
+    {
+        return std::string_view(this->data(), this->size());
+    }
 };
 
-template <typename Char, std::size_t Cap1, std::size_t Cap2>
-constexpr bool operator==(const StaticString<Char, Cap1>& lhs, const StaticString<Char, Cap2>& rhs)
+template <typename Char, std::size_t Cap>
+constexpr bool operator==(const StaticString<Char, Cap>& lhs, const __impl::BasicStringWrapper& rhs)
 {
-    return Cap1 == Cap2 && calgo::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+    return calgo::equal(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
 }
+
+namespace operators
+{
+    using d1::utils::containers::operator==;
+}  // namespace operators
 
 }  // namespace d1::utils::containers

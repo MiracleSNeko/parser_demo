@@ -13,7 +13,9 @@ using d1::utils::option::SOME;
 
 namespace d1::core::parser
 {
-constexpr std::string_view MODULE_NAME{"core/parser.hpp"};
+using namespace std::literals;
+
+constexpr auto MODULE_NAME{"core/parser.hpp"sv};
 
 using ParserInput = std::string_view;
 

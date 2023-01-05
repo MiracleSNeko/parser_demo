@@ -1,19 +1,9 @@
 #include <gtest/gtest.h>
 
-#include "../../inc/core/basic_parser_conbinators.hpp"
-#include "../../inc/core/conbinator.hpp"
-#include "../../inc/core/parser.hpp"
+#include "../../inc/parser_demo"
 
-using d1::core::basic_parser_combinator::ParseChar;
-using d1::core::basic_parser_combinator::ParseOneOfChars;
-using d1::core::basic_parser_combinator::ParseString;
-using d1::core::combinator::Any;
-using d1::core::combinator::Combine;
-using d1::core::combinator::Exactly;
-using d1::core::combinator::Many;
-
-using namespace d1::core::basic_parser_combinator::literals;
 using namespace std::literals;
+using namespace d1;
 
 TEST(BasicParserCombinators, StringParser)
 {
@@ -124,4 +114,28 @@ TEST(BasicParserCombinators, Uint64WithRangeExceeded)
     constexpr auto none = uint64_parser(""sv);
 
     static_assert(none.is_none());
+}
+
+TEST(BasicParserCombinators, EscapeChar)
+{
+    constexpr auto result = escape_chara_parser(R"(\\)"sv);
+
+    static_assert(result.unwrap().first == '\\');
+    static_assert(result.unwrap().second == ""sv);
+}
+
+TEST(BasicParserCombinators, CString)
+{
+    constexpr auto result = c_str_parser<>(R"(abcdefg)"sv);
+
+    static_assert(result.unwrap().first == "abcdefg"sv);
+    static_assert(result.unwrap().second == ""sv);
+}
+
+TEST(BasicParserCombinators, CStringWithEscape)
+{
+    constexpr auto result = c_str_parser<>(R"(abcde\fg\n\\)"sv);
+
+    static_assert(result.unwrap().first == "abcde\fg\n\\"sv);
+    static_assert(result.unwrap().second == ""sv);
 }

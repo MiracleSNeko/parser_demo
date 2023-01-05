@@ -1,9 +1,9 @@
 #include <gtest/gtest.h>
 #include <stdexcept>
 
-#include "../../inc/utils/containers.hpp"
+#include "../../inc/parser_demo"
 
-using d1::utils::containers::StaticVector;
+using namespace d1;
 
 TEST(StaticVector, Construct)
 {

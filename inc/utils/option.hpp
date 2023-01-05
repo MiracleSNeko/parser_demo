@@ -12,8 +12,9 @@
 
 namespace d1::utils::option
 {
+using namespace std::literals;
 
-constexpr std::string_view MODULE_NAME{"utils/option.hpp"};
+constexpr auto MODULE_NAME{"utils/option.hpp"sv};
 
 template <typename T>
 class Option;
@@ -171,5 +172,11 @@ constexpr auto operator<<=(Fn1&& fn1, Fn2&& fn2)
 {
     return [=](const auto& input) { return fn1(input) >>= fn2; };
 }
+
+namespace operators
+{
+    using d1::utils::option::operator>>=;
+    using d1::utils::option::operator<<=;
+}  // namespace operators
 
 }  // namespace d1::utils::option

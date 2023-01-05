@@ -6,7 +6,7 @@
 #include "../utils/algorithms.hpp"
 #include "../utils/containers.hpp"
 #include "../utils/option.hpp"
-#include "./conbinator.hpp"
+#include "./combinator.hpp"
 #include "./parser.hpp"
 
 using d1::core::combinator::Combine;
@@ -15,15 +15,20 @@ using d1::core::combinator::Try;
 using d1::core::parser::Map;
 using d1::core::parser::ParserInput;
 using d1::core::parser::ParserOutput;
+using d1::utils::containers::StaticString;
 using d1::utils::option::NONE;
 using d1::utils::option::None;
 using d1::utils::option::SOME;
 using d1::utils::option::Some;
 
-using namespace std::literals;
-
 namespace d1::core::basic_parser_combinator
 {
+using namespace d1::utils::option::operators;
+using namespace d1::core::combinator::operators;
+using namespace std::literals;
+
+constexpr auto MODULE_NAME{"core/basic_parser_combinator.hpp"sv};
+
 // parse a given char
 constexpr auto ParseChar(char ch)
 {
@@ -72,6 +77,43 @@ constexpr auto ParseString(std::string_view str)
     };
 }
 
+// parse a escaped char
+constexpr auto ParseEscapeChar()
+{
+    constexpr auto backslash_parser    = ParseChar('\\');
+    constexpr auto special_char_parser = ParseOneOfChars("abfnrtv'") || ParseChar('\\') || ParseChar('\"');
+
+    constexpr auto convert_special_char = [](char c) {
+        switch (c)
+        {
+            case 'a': return '\a';
+            case 'b': return '\b';
+            case 'f': return '\f';
+            case 'n': return '\n';
+            case 'r': return '\r';
+            case 't': return '\t';
+            case 'v': return '\v';
+            default: return c;
+        }
+    };
+
+    return Map(backslash_parser >> special_char_parser, convert_special_char);
+}
+
+constexpr auto ParseCStringChar()
+{
+    return ParseEscapeChar() || ParseNoneOfChars("\\\"");
+}
+
+template <std::size_t Capacity = 128>
+constexpr auto ParseCString()
+{
+    return Many(ParseCStringChar(), StaticString<char, Capacity>(), [](auto acc, auto ch) {
+        acc.push_back(ch);
+        return acc;
+    });
+}
+
 inline namespace literals
 {
     // [a-zA-Z]
@@ -86,6 +128,17 @@ inline namespace literals
     // [0-9]
     constexpr auto digit_parser =
         Map(ParseOneOfChars("0123456789"sv), [](char ch) { return static_cast<int>(ch - '0'); });
+
+    // Escape charactors
+    constexpr auto escape_chara_parser = ParseEscapeChar();
+
+    // c_str charactors
+    constexpr auto c_str_chara_parser = ParseCStringChar();
+
+    // c_str
+    template <std::size_t Capacity = 128>
+    constexpr auto c_str_parser = ParseCString<Capacity>();
+
 }  // namespace literals
 
 // parse a int32_value

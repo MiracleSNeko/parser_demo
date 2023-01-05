@@ -9,19 +9,17 @@
 #include "../utils/option.hpp"
 #include "./parser.hpp"
 
-using namespace std::literals;
-
 using d1::core::parser::ParserInput;
 using d1::core::parser::ParserOutput;
 using d1::utils::option::None;
 using d1::utils::option::NONE;
 using d1::utils::option::Some;
 using d1::utils::option::SOME;
-using d1::utils::option::operator>>=;
-using d1::utils::option::operator<<=;
 
 namespace d1::core::combinator
 {
+using namespace std::literals;
+using namespace d1::utils::option::operators;
 
 constexpr auto MODULE_NAME{"core/combinator.hpp"sv};
 
@@ -252,5 +250,12 @@ constexpr auto Exactly(Parser&& parser, Acc&& acc, std::size_t times, Fn&& fn)
 {
     return [=](ParserInput code) -> ParserOutput<Acc> { return __impl::FoldExactly(parser, code, acc, times, fn); };
 }
+
+namespace operators
+{
+    using d1::core::combinator::operator||;
+    using d1::core::combinator::operator<<;
+    using d1::core::combinator::operator>>;
+}  // namespace operators
 
 }  // namespace d1::core::combinator

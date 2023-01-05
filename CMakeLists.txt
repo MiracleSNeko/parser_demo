@@ -16,6 +16,7 @@ file(
     GLOB_RECURSE SRC_DIR_LIST
     "test/*.cpp"
     "test/*.c"
+    "src/fmt/test/*.cpp"
 )
 
 message(STATUS "source files as follows...")
