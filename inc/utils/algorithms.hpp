@@ -153,12 +153,24 @@ constexpr OutputIterator copy_n(InputIterator src_first, InputIterator src_last,
     return dest;
 }
 
+template <typename BidirectionIterator1, typename BidirectionIterator2>
+constexpr BidirectionIterator2 copy_backward(BidirectionIterator1 src_first, BidirectionIterator1 src_last,
+                                             BidirectionIterator2 dest)
+{
+    for (; src_first != src_last; --src_last)
+    {
+        *dest = *src_last;
+        --dest;
+    }
+}
+
 template <typename InputIterator, typename OutputIterator>
 constexpr OutputIterator move(InputIterator src_first, InputIterator src_last, OutputIterator dest)
 {
     for (; src_first != src_last; ++src_first)
     {
         *dest = std::move(*src_first);
+        ++dest;
     }
     return dest;
 }
@@ -188,6 +200,17 @@ constexpr OutputIterator move_n(InputIterator src_first, InputIterator src_last,
         ++dest;
     }
     return dest;
+}
+
+template <typename BidirectionIterator1, typename BidirectionIterator2>
+constexpr BidirectionIterator2 move_backward(BidirectionIterator1 src_first, BidirectionIterator1 src_last,
+                                             BidirectionIterator2 dest)
+{
+    for (; src_first != src_last; --src_last)
+    {
+        *dest = std::move(*src_last);
+        --dest;
+    }
 }
 
 template <typename InputIterator, typename T>

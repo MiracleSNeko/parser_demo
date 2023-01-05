@@ -11,6 +11,8 @@
 #include <string_view>
 #include <utility>
 
+using d1::utils::iterator::back_insert_iterator;
+
 namespace d1::utils::containers
 {
 using namespace std::literals;
@@ -78,6 +80,32 @@ public:
     constexpr auto cend() const
     {
         return std::next(_data.cbegin(), _size);
+    }
+
+    constexpr auto rbegin() const
+    {
+        return _data.rbegin();
+    }
+    constexpr auto rbegin()
+    {
+        return _data.rbegin();
+    }
+    constexpr auto crbegin()
+    {
+        return _data.crbegin();
+    }
+
+    constexpr auto rend() const
+    {
+        return _data.rend();
+    }
+    constexpr auto rend()
+    {
+        return _data.rend();
+    }
+    constexpr auto crend()
+    {
+        return _data.crend();
     }
 
     // like std::vector, operator[] has no index check.

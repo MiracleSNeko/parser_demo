@@ -6,8 +6,8 @@ project(parser_demo)
 set(CMAKE_CXX_COMPILER "clang++")
 set(CMAKE_BUILD_TYPE DEBUG)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -std=c++20")
-set(CMAKE_CXX_FLAGS_RELEASE "-W -Wall -std=c++20 -o2")
+set(CMAKE_CXX_FLAGS_DEBUG "-g -Wall -std=c++20 -fprofile-arcs -ftest-coverage")
+set(CMAKE_CXX_FLAGS_RELEASE "-W -Wall -std=c++20 -o2 -fprofile-arcs -ftest-coverage")
 
 # set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
